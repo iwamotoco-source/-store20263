@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<title>MyAppStore</title>
+<style>
+/* ============================================================
+   ROOT / RESET
+============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:          #f2f2f7;
+  --bg2:         #ffffff;
+  --bg3:         #e5e5ea;
+  --bg4:         #d1d1d6;
+  --text:        #1c1c1e;
+  --text2:       #6e6e73;
+  --text3:       #aeaeb2;
+  --accent:      #007aff;
+  --accent2:     #5856d6;
+  --success:     #34c759;
+  --danger:      #ff3b30;
+  --warning:     #ff9500;
+  --card-sh:     0 2px 14px rgba(0,0,0,.09);
+  --radius:      16px;
+  --radius-sm:   10px;
+  --header-h:    56px;
+  --tab-h:       60px;
+  --safe-b:      env(safe-area-inset-bottom,0px);
+  --safe-t:      env(safe-area-inset-top,0px);
+  --tr:          .22s cubic-bezier(.4,0,.2,1);
+  --font: -apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
+}
+[data-theme="dark"] {
+  --bg:    #000;
+  --bg2:   #1c1c1e;
+  --bg3:   #2c2c2e;
+  --bg4:   #3a3a3c;
+  --text:  #fff;
+  --text2: rgba(235,235,245,.75);
+  --text3: rgba(235,235,245,.38);
+  --card-sh: 0 2px 18px rgba(0,0,0,.55);
+}
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  transition: background .3s, color .3s;
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+.header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: calc(var(--header-h) + var(--safe-t));
+  padding-top: var(--safe-t);
+  background: rgba(var(--bg2-rgb, 255,255,255), .85);
+  border-bottom: 1px solid var(--bg3);
+  display: flex; align-items: center;
+  padding-left: 16px; padding-right: 16px; gap: 10px;
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+[data-theme="dark"] .header { background: rgba(28,28,30,.85); }
+.header-logo {
+  font-size: 20px; font-weight: 800; letter-spacing: -.5px; flex: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hbtn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: none; cursor: pointer;
+  background: var(--bg3); color: var(--text2);
+  font-size: 17px; display: flex; align-items: center; justify-content: center;
+  transition: background var(--tr), transform var(--tr);
+  flex-shrink: 0;
+}
+.hbtn:active { transform: scale(.9); }
+.hbtn.admin-active { background: var(--warning); color: #fff; }
+
+/* ============================================================
+   TABS
+============================================================ */
+.tabs {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+  height: calc(var(--tab-h) + var(--safe-b));
+  background: rgba(var(--bg2-rgb,255,255,255),.88);
+  border-top: 1px solid var(--bg3);
+  display: flex; align-items: flex-start; padding-top: 8px;
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+}
+[data-theme="dark"] .tabs { background: rgba(28,28,30,.88); }
+.tab-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  cursor: pointer; padding: 4px 0;
+  color: var(--text3); transition: color var(--tr);
+  border: none; background: none; font-family: var(--font);
+}
+.tab-item.active { color: var(--accent); }
+.tab-icon { font-size: 22px; line-height: 1; }
+.tab-label { font-size: 10px; font-weight: 600; }
+
+/* ============================================================
+   MAIN
+============================================================ */
+.main {
+  padding-top: calc(var(--header-h) + var(--safe-t) + 12px);
+  padding-bottom: calc(var(--tab-h) + var(--safe-b) + 16px);
+  padding-left: 16px; padding-right: 16px;
+  min-height: 100dvh;
+}
+.page { display: none; }
+.page.active { display: block; }
+
+/* ============================================================
+   SECTION HEADER
+============================================================ */
+.sec-hd {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 20px 0 12px;
+}
+.sec-hd h2 { font-size: 20px; font-weight: 800; }
+.sec-hd a { font-size: 14px; color: var(--accent); font-weight: 500; cursor: pointer; }
+
+/* ============================================================
+   FEATURED BANNER
+============================================================ */
+.featured {
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  padding: 26px 20px 26px 24px;
+  color: #fff; position: relative; overflow: hidden;
+  cursor: pointer; margin-bottom: 4px;
+  min-height: 130px; display: flex; align-items: center;
+}
+.featured::before {
+  content: ''; position: absolute;
+  right: -30px; top: -30px;
+  width: 180px; height: 180px;
+  background: rgba(255,255,255,.1); border-radius: 50%;
+}
+.featured-text { flex: 1; min-width: 0; padding-right: 90px; }
+.featured-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 1.2px; opacity: .75; text-transform: uppercase; margin-bottom: 5px; }
+.featured-title { font-size: 22px; font-weight: 800; line-height: 1.2; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.featured-sub { font-size: 12px; opacity: .8; line-height: 1.5; }
+.featured-icon {
+  position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+  width: 72px; height: 72px; border-radius: 18px;
+  overflow: hidden; background: rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center; font-size: 36px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+}
+.featured-icon img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ============================================================
+   HORIZONTAL SCROLL ROW
+============================================================ */
+.app-row {
+  display: flex; gap: 16px; overflow-x: auto;
+  padding-bottom: 8px; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.app-row::-webkit-scrollbar { display: none; }
+.app-card {
+  min-width: 136px; max-width: 136px;
+  scroll-snap-align: start; cursor: pointer;
+}
+.app-card-icon {
+  width: 78px; height: 78px; border-radius: 20px;
+  background: var(--bg3); overflow: hidden;
+  margin-bottom: 8px; box-shadow: var(--card-sh);
+  display: flex; align-items: center; justify-content: center; font-size: 34px;
+}
+.app-card-icon img { width: 100%; height: 100%; object-fit: cover; }
+.app-card-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app-card-cat { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+
+/* ============================================================
+   GET BUTTON (入手)
+============================================================ */
+.get-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--bg3); color: var(--accent);
+  font-size: 12px; font-weight: 700;
+  border: none; border-radius: 20px;
+  padding: 5px 14px; cursor: pointer;
+  transition: all var(--tr); font-family: var(--font);
+  white-space: nowrap;
+}
+.get-btn:active { transform: scale(.93); background: var(--accent); color: #fff; }
+.get-btn.installed { background: var(--bg3); color: var(--text3); }
+
+/* ============================================================
+   APP LIST (vertical)
+============================================================ */
+.app-list { display: flex; flex-direction: column; }
+.ali {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 0; border-bottom: 1px solid var(--bg3);
+  cursor: pointer;
+}
+.ali:last-child { border-bottom: none; }
+.ali-icon {
+  width: 60px; height: 60px; border-radius: 14px;
+  background: var(--bg3); flex-shrink: 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; box-shadow: var(--card-sh);
+}
+.ali-icon img { width: 100%; height: 100%; object-fit: cover; }
+.ali-info { flex: 1; min-width: 0; }
+.ali-name { font-size: 15px; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ali-cat { font-size: 12px; color: var(--text3); margin-bottom: 3px; }
+.ali-desc { font-size: 12px; color: var(--text2); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ali-action { flex-shrink: 0; }
+
+/* ============================================================
+   SEARCH
+============================================================ */
+.search-wrap { position: relative; margin-bottom: 14px; }
+.search-input {
+  width: 100%; padding: 10px 16px 10px 40px;
+  border-radius: var(--radius-sm); border: none;
+  background: var(--bg3); color: var(--text);
+  font-size: 15px; font-family: var(--font); outline: none;
+}
+.search-input::placeholder { color: var(--text3); }
+.search-icon-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 15px; pointer-events: none; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 14px; }
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  flex-shrink: 0; padding: 6px 14px;
+  border-radius: 20px; border: 1.5px solid var(--bg3);
+  background: var(--bg2); color: var(--text2);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: all var(--tr); font-family: var(--font);
+}
+.chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+.set-section { margin-bottom: 28px; }
+.set-label { font-size: 12px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .8px; padding: 0 4px; margin-bottom: 8px; }
+.set-card { background: var(--bg2); border-radius: var(--radius); overflow: hidden; box-shadow: var(--card-sh); }
+.set-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-bottom: 1px solid var(--bg3);
+  cursor: pointer;
+}
+.set-row:last-child { border-bottom: none; }
+.set-row:active { background: var(--bg3); }
+.set-row-icon { font-size: 20px; width: 32px; text-align: center; }
+.set-row-info { flex: 1; }
+.set-row-title { font-size: 15px; font-weight: 500; }
+.set-row-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.set-row-right { color: var(--text3); font-size: 14px; }
+.toggle {
+  width: 48px; height: 28px; border-radius: 14px;
+  background: var(--bg3); border: none; cursor: pointer;
+  position: relative; transition: background var(--tr); flex-shrink: 0;
+}
+.toggle.on { background: var(--success); }
+.toggle::after {
+  content: ''; position: absolute;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: #fff; top: 3px; left: 3px;
+  transition: transform var(--tr); box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.toggle.on::after { transform: translateX(20px); }
+.status-pill {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px;
+}
+.status-pill.ok { background: #34c75920; color: var(--success); }
+.status-pill.ng { background: #ff3b3020; color: var(--danger); }
+.status-pill.idle { background: var(--bg3); color: var(--text3); }
+
+/* ============================================================
+   FAB
+============================================================ */
+.fab {
+  position: fixed;
+  right: 24px;
+  bottom: calc(var(--tab-h) + var(--safe-b) + 20px);
+  z-index: 300;
+  width: 56px; height: 56px; border-radius: 28px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none; cursor: pointer;
+  box-shadow: 0 4px 22px rgba(0,122,255,.45);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: #fff;
+  transition: transform var(--tr), opacity var(--tr);
+}
+.fab:active { transform: scale(.92); }
+.fab.hidden { opacity: 0; pointer-events: none; }
+
+/* ============================================================
+   MODAL BASE
+============================================================ */
+.overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.46);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--tr);
+}
+.overlay.open { opacity: 1; pointer-events: all; }
+.sheet {
+  width: 100%; max-height: 95dvh;
+  background: var(--bg2); border-radius: 24px 24px 0 0;
+  overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  padding-bottom: calc(20px + var(--safe-b));
+}
+.overlay.open .sheet { transform: translateY(0); }
+.sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--bg3); margin: 12px auto 0; }
+.sheet-hd {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 20px 14px; border-bottom: 1px solid var(--bg3);
+}
+.sheet-hd h2 { flex: 1; font-size: 18px; font-weight: 700; }
+.sheet-cancel, .sheet-action {
+  font-size: 15px; font-weight: 600; border: none;
+  background: none; cursor: pointer; font-family: var(--font); padding: 4px 6px;
+}
+.sheet-cancel { color: var(--text3); }
+.sheet-action { color: var(--accent); }
+.sheet-action:disabled { opacity: .35; pointer-events: none; }
+
+/* ============================================================
+   FORM
+============================================================ */
+.fg { padding: 16px 20px 0; }
+.flabel { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 7px; display: block; }
+.finput, .ftextarea, .fselect {
+  width: 100%; padding: 12px 14px;
+  border-radius: var(--radius-sm); border: 1.5px solid var(--bg3);
+  background: var(--bg); color: var(--text);
+  font-size: 15px; font-family: var(--font); outline: none;
+  transition: border-color var(--tr);
+}
+.finput:focus, .ftextarea:focus, .fselect:focus { border-color: var(--accent); }
+.ftextarea { resize: vertical; min-height: 76px; line-height: 1.55; }
+.fselect {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236e6e73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+  background-color: var(--bg);
+}
+.fhint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+.fetch-row { display: flex; gap: 8px; }
+.fetch-row .finput { flex: 1; }
+.fetch-btn {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  border: none; background: var(--accent); color: #fff;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  font-family: var(--font); white-space: nowrap;
+  transition: opacity var(--tr);
+}
+.fetch-btn:disabled { opacity: .45; pointer-events: none; }
+
+/* URL Preview card */
+.url-preview {
+  display: none; gap: 12px; align-items: center;
+  padding: 12px 14px; background: var(--bg); border-radius: var(--radius-sm);
+  margin-top: 10px; border: 1.5px solid var(--bg3);
+}
+.url-preview.show { display: flex; }
+.url-prev-icon {
+  width: 52px; height: 52px; border-radius: 13px;
+  overflow: hidden; background: var(--bg3); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.url-prev-icon img { width: 100%; height: 100%; object-fit: cover; }
+.url-prev-info { flex: 1; min-width: 0; }
+.url-prev-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.url-prev-url { font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+.url-prev-ok { font-size: 11px; color: var(--success); font-weight: 600; margin-top: 3px; }
+
+/* Submit bottom btn */
+.submit-full {
+  margin: 18px 20px 0;
+  width: calc(100% - 40px); padding: 15px;
+  border-radius: var(--radius); border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: var(--font);
+  opacity: .4; transition: opacity var(--tr);
+}
+.submit-full:not(:disabled) { opacity: 1; }
+
+/* ============================================================
+   DETAIL SHEET
+============================================================ */
+.detail-hero {
+  display: flex; gap: 16px; padding: 20px 20px 16px;
+  align-items: flex-start;
+}
+.detail-icon {
+  width: 90px; height: 90px; border-radius: 22px;
+  overflow: hidden; background: var(--bg3); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px; box-shadow: var(--card-sh);
+}
+.detail-icon img { width: 100%; height: 100%; object-fit: cover; }
+.detail-meta { flex: 1; min-width: 0; }
+.detail-name { font-size: 22px; font-weight: 800; margin-bottom: 3px; }
+.detail-cat { font-size: 13px; color: var(--text3); margin-bottom: 10px; }
+.detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.detail-get {
+  background: var(--accent); color: #fff;
+  font-size: 14px; font-weight: 700;
+  border: none; border-radius: 20px;
+  padding: 8px 22px; cursor: pointer; font-family: var(--font);
+}
+.detail-open {
+  background: var(--bg3); color: var(--accent);
+  font-size: 14px; font-weight: 700;
+  border: none; border-radius: 20px;
+  padding: 8px 18px; cursor: pointer; font-family: var(--font);
+}
+.divider { height: 1px; background: var(--bg3); margin: 0 20px 14px; }
+.detail-sec { padding: 0 20px 14px; }
+.detail-sec h3 { font-size: 13px; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 7px; }
+.detail-desc { font-size: 15px; line-height: 1.65; color: var(--text); }
+.detail-url-row {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg); padding: 10px 12px; border-radius: var(--radius-sm);
+}
+.detail-url-text { font-size: 12px; color: var(--text3); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.copy-btn {
+  font-size: 12px; font-weight: 700; color: var(--accent);
+  border: none; background: none; cursor: pointer; font-family: var(--font);
+}
+.admin-btns { display: flex; gap: 8px; padding: 0 20px 6px; }
+.abtn {
+  flex: 1; padding: 11px; border-radius: var(--radius-sm);
+  border: none; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--font);
+}
+.abtn-edit { background: var(--bg3); color: var(--text); }
+.abtn-del { background: #ff3b3015; color: var(--danger); }
+
+/* ============================================================
+   PIN MODAL
+============================================================ */
+.pin-overlay {
+  position: fixed; inset: 0; z-index: 700;
+  background: rgba(0,0,0,.6);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--tr);
+  padding: 20px;
+}
+.pin-overlay.open { opacity: 1; pointer-events: all; }
+.pin-card {
+  background: var(--bg2); border-radius: 24px;
+  padding: 28px 24px; width: 100%; max-width: 320px;
+  text-align: center;
+  transform: scale(.92);
+  transition: transform var(--tr);
+  box-shadow: 0 20px 60px rgba(0,0,0,.3);
+}
+.pin-overlay.open .pin-card { transform: scale(1); }
+.pin-icon { font-size: 40px; margin-bottom: 10px; }
+.pin-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+.pin-sub { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+.pin-dots { display: flex; justify-content: center; gap: 12px; margin-bottom: 22px; }
+.pin-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg3); transition: background var(--tr);
+}
+.pin-dot.filled { background: var(--accent); }
+.pin-dot.error { background: var(--danger); }
+.pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.pin-key {
+  padding: 16px; border-radius: var(--radius-sm);
+  border: none; background: var(--bg3); color: var(--text);
+  font-size: 20px; font-weight: 600; cursor: pointer;
+  font-family: var(--font); transition: background var(--tr);
+}
+.pin-key:active { background: var(--accent); color: #fff; }
+.pin-key.del { font-size: 18px; }
+.pin-error { font-size: 13px; color: var(--danger); margin-top: 12px; font-weight: 600; min-height: 20px; }
+.pin-close {
+  margin-top: 14px; font-size: 14px; color: var(--text3);
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font);
+}
+
+/* ============================================================
+   INSTALL GUIDE MODAL
+============================================================ */
+.install-overlay {
+  position: fixed; inset: 0; z-index: 600;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--tr);
+}
+.install-overlay.open { opacity: 1; pointer-events: all; }
+.install-sheet {
+  width: 100%; background: var(--bg2);
+  border-radius: 24px 24px 0 0; overflow: hidden;
+  transform: translateY(100%);
+  transition: transform .35s cubic-bezier(.4,0,.2,1);
+  padding-bottom: calc(24px + var(--safe-b));
+}
+.install-overlay.open .install-sheet { transform: translateY(0); }
+.install-hd {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px 20px 16px;
+}
+.install-app-icon {
+  width: 56px; height: 56px; border-radius: 14px;
+  overflow: hidden; background: var(--bg3); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.install-app-icon img { width: 100%; height: 100%; object-fit: cover; }
+.install-app-name { font-size: 18px; font-weight: 800; }
+.install-app-sub { font-size: 13px; color: var(--text3); }
+.install-body { padding: 0 20px; }
+.install-platform-title { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+.install-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.install-step {
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.step-text { font-size: 14px; line-height: 1.55; color: var(--text); padding-top: 4px; }
+.step-text strong { color: var(--accent); }
+.install-open-btn {
+  width: 100%; padding: 15px;
+  border-radius: var(--radius); border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff; font-size: 16px; font-weight: 700;
+  cursor: pointer; font-family: var(--font);
+}
+.install-note { font-size: 12px; color: var(--text3); text-align: center; margin-top: 10px; line-height: 1.5; }
+
+/* ============================================================
+   EMPTY / TOAST / SPINNER
+============================================================ */
+.empty {
+  text-align: center; padding: 48px 20px;
+  color: var(--text3);
+}
+.empty-icon { font-size: 52px; margin-bottom: 10px; }
+.empty h3 { font-size: 17px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+.empty p { font-size: 13px; line-height: 1.6; }
+.toast {
+  position: fixed; top: calc(var(--header-h) + var(--safe-t) + 12px);
+  left: 50%; transform: translateX(-50%) translateY(-70px);
+  z-index: 900; background: var(--text); color: var(--bg2);
+  padding: 10px 20px; border-radius: 24px;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+  transition: transform .28s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 4px 20px rgba(0,0,0,.3); pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.spinner {
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid var(--bg3); border-top-color: var(--accent);
+  animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.admin-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--warning); color: #fff;
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px;
+}
+
+/* ============================================================
+   PC LAYOUT
+============================================================ */
+@media (min-width: 768px) {
+  :root { --header-h: 60px; }
+  .main { max-width: 960px; margin: 0 auto; padding-left: 24px; padding-right: 24px; }
+  .tabs {
+    top: 0; bottom: auto; height: var(--header-h);
+    border-top: none; align-items: center; padding-top: 0;
+    background: transparent; backdrop-filter: none; border-bottom: none;
+    position: static; /* tabs inside header on PC */
+  }
+  /* override: render tabs inside header area via flex */
+  body { display: block; }
+  .header { justify-content: space-between; max-width: 960px; left: 50%; transform: translateX(-50%); }
+  .tabs {
+    position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+    width: auto; gap: 4px; height: var(--header-h);
+    background: transparent; backdrop-filter: none; border: none; padding: 0;
+  }
+  .tab-item { flex-direction: row; gap: 6px; padding: 6px 14px; border-radius: 10px; }
+  .tab-item.active { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+  .tab-icon { font-size: 17px; }
+  .tab-label { font-size: 13px; }
+  .sheet, .install-sheet { max-width: 580px; margin: 0 auto; border-radius: 24px; margin-bottom: 48px; }
+  .overlay, .install-overlay { align-items: center; }
+  .pin-card { max-width: 340px; }
+  .fab { right: calc(50% - 456px); }
+}
+</style>
+
+  <link rel="manifest" href="/-store20263/manifest.json">
+  <meta name="theme-color" content="#0a84ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="AppStore!">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/-store20263/icon-192.png">
+  <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/-store20263/sw.js').catch(()=>{});});}</script>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-logo">✦ MyAppStore</div>
+  <button class="hbtn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+  <button class="hbtn" id="syncBtn" onclick="syncGist()" title="Gist同期">☁️</button>
+  <button class="hbtn" id="adminBtn" onclick="handleAdminBtn()" title="管理者">🔒</button>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="tab-item active" data-tab="home" onclick="switchTab('home')">
+    <span class="tab-icon">🏠</span><span class="tab-label">ホーム</span>
+  </button>
+  <button class="tab-item" data-tab="search" onclick="switchTab('search')">
+    <span class="tab-icon">🔍</span><span class="tab-label">検索</span>
+  </button>
+  <button class="tab-item" data-tab="settings" onclick="switchTab('settings')">
+    <span class="tab-icon">⚙️</span><span class="tab-label">設定</span>
+  </button>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- HOME -->
+  <section class="page active" id="page-home">
+    <div class="featured" id="featuredBanner" onclick="featuredTap()">
+      <div class="featured-text">
+        <div class="featured-eyebrow">✦ おすすめ</div>
+        <div class="featured-title" id="featuredTitle">アプリを登録しよう</div>
+        <div class="featured-sub" id="featuredSub">右下の＋から追加できます</div>
+      </div>
+      <div class="featured-icon" id="featuredIcon">📱</div>
+    </div>
+
+    <div class="sec-hd"><h2>最近追加</h2><a onclick="switchTab('search')">すべて見る</a></div>
+    <div class="app-row" id="recentRow"></div>
+
+    <div class="sec-hd"><h2>すべてのアプリ</h2></div>
+    <div class="app-list" id="allList"></div>
+  </section>
+
+  <!-- SEARCH -->
+  <section class="page" id="page-search">
+    <div class="sec-hd" style="margin-top:8px"><h2>検索</h2></div>
+    <div class="search-wrap">
+      <span class="search-icon-label">🔍</span>
+      <input class="search-input" type="search" id="searchInput"
+             placeholder="アプリ名・説明で検索…" oninput="doSearch()">
+    </div>
+    <div class="chips" id="catChips"></div>
+    <div class="app-list" id="searchList"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="page" id="page-settings">
+    <div class="sec-hd" style="margin-top:8px"><h2>設定</h2></div>
+
+    <div class="set-section">
+      <div class="set-label">外観</div>
+      <div class="set-card">
+        <div class="set-row" onclick="toggleTheme()">
+          <div class="set-row-icon">🎨</div>
+          <div class="set-row-info">
+            <div class="set-row-title">ダークモード</div>
+            <div class="set-row-sub" id="themeSubText">現在：ライト</div>
+          </div>
+          <button class="toggle" id="themeToggle"></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-label">管理者設定</div>
+      <div class="set-card">
+        <div class="set-row" onclick="openPinSetup()">
+          <div class="set-row-icon">🔑</div>
+          <div class="set-row-info">
+            <div class="set-row-title">管理者PINを変更</div>
+            <div class="set-row-sub" id="pinSetSub">4桁のPINコード</div>
+          </div>
+          <div class="set-row-right">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-label">GitHub Gist 同期</div>
+      <div class="set-card">
+        <div class="set-row">
+          <div class="set-row-icon">🔑</div>
+          <div class="set-row-info">
+            <div class="set-row-title">Personal Access Token</div>
+            <div class="set-row-sub">github.com/settings/tokens （scope: gist）</div>
+          </div>
+          <span class="status-pill idle" id="tokenStatus">未設定</span>
+        </div>
+        <div style="padding:10px 16px 14px">
+          <input class="finput" type="password" id="tokenInput"
+                 placeholder="ghp_xxxxxxxxxxxx" oninput="onTokenInput()">
+        </div>
+        <div class="set-row">
+          <div class="set-row-icon">📋</div>
+          <div class="set-row-info">
+            <div class="set-row-title">Gist ID</div>
+            <div class="set-row-sub">空欄で初回自動作成</div>
+          </div>
+        </div>
+        <div style="padding:10px 16px 14px">
+          <input class="finput" type="text" id="gistIdInput"
+                 placeholder="例：abc123def456..." oninput="saveSettings()">
+        </div>
+        <div class="set-row" onclick="syncGist()">
+          <div class="set-row-icon">☁️</div>
+          <div class="set-row-info"><div class="set-row-title">今すぐ同期</div></div>
+          <div class="set-row-right" id="lastSyncText">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="set-section">
+      <div class="set-label">データ</div>
+      <div class="set-card">
+        <div class="set-row" onclick="exportData()">
+          <div class="set-row-icon">📤</div>
+          <div class="set-row-info"><div class="set-row-title">JSONエクスポート</div></div>
+          <div class="set-row-right">›</div>
+        </div>
+        <div class="set-row" onclick="document.getElementById('importFile').click()">
+          <div class="set-row-icon">📥</div>
+          <div class="set-row-info"><div class="set-row-title">JSONインポート</div></div>
+          <div class="set-row-right">›</div>
+        </div>
+        <div class="set-row" onclick="confirmClear()">
+          <div class="set-row-icon">🗑️</div>
+          <div class="set-row-info">
+            <div class="set-row-title" style="color:var(--danger)">全データ削除</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;padding:8px 0 4px;font-size:12px;color:var(--text3)">
+      MyAppStore v1.0
+    </div>
+  </section>
+
+</main>
+
+<!-- FAB（管理者のみ表示） -->
+<button class="fab hidden" id="fab" onclick="openAddModal()">＋</button>
+
+<!-- ===================== DETAIL SHEET ===================== -->
+<div class="overlay" id="detailOverlay" onclick="bgClose(event,'detailOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="detail-hero">
+      <div class="detail-icon" id="detailIcon">📱</div>
+      <div class="detail-meta">
+        <div class="detail-name" id="detailName"></div>
+        <div class="detail-cat" id="detailCat"></div>
+        <div class="detail-actions">
+          <button class="detail-get" id="detailGetBtn" onclick="triggerInstall()">入手</button>
+          <button class="detail-open" onclick="openCurrentApp()">開く</button>
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="detail-sec">
+      <h3>説明</h3>
+      <div class="detail-desc" id="detailDesc"></div>
+    </div>
+    <div class="detail-sec">
+      <h3>URL</h3>
+      <div class="detail-url-row">
+        <div class="detail-url-text" id="detailUrl"></div>
+        <button class="copy-btn" onclick="copyUrl()">コピー</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <!-- 管理者のみ表示 -->
+    <div class="admin-btns" id="detailAdminBtns" style="display:none">
+      <button class="abtn abtn-edit" onclick="editCurrentApp()">✏️ 編集</button>
+      <button class="abtn abtn-del" onclick="deleteCurrentApp()">🗑️ 削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== ADD / EDIT SHEET ===================== -->
+<div class="overlay" id="addOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <button class="sheet-cancel" onclick="closeOverlay('addOverlay')">キャンセル</button>
+      <h2 id="addTitle">アプリを追加</h2>
+      <button class="sheet-action" id="addActionBtn" onclick="submitApp()" disabled>登録</button>
+    </div>
+
+    <div class="fg">
+      <label class="flabel">アプリのURL <span style="color:var(--danger)">*</span></label>
+      <div class="fetch-row">
+        <input class="finput" type="url" id="urlInput"
+               placeholder="https://yourname.github.io/app/"
+               oninput="onUrlInput()">
+        <button class="fetch-btn" id="fetchBtn" onclick="fetchMeta()" disabled>取得</button>
+      </div>
+      <div class="fhint">GitHub PagesなどのPWAのURLを入力してください</div>
+      <div class="url-preview" id="urlPreview">
+        <div class="url-prev-icon" id="prevIcon">📱</div>
+        <div class="url-prev-info">
+          <div class="url-prev-name" id="prevName">—</div>
+          <div class="url-prev-url" id="prevUrl">—</div>
+          <div class="url-prev-ok">✓ 情報を取得しました</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fg">
+      <label class="flabel">アプリ名 <span style="color:var(--danger)">*</span></label>
+      <input class="finput" type="text" id="appName"
+             placeholder="例：スケジュール帳" oninput="validateForm()">
+    </div>
+
+    <div class="fg">
+      <label class="flabel">カテゴリ</label>
+      <select class="fselect" id="appCat">
+        <option value="ツール">🛠 ツール</option>
+        <option value="ライフスタイル">💑 ライフスタイル</option>
+        <option value="健康">💪 健康・フィットネス</option>
+        <option value="ゲーム">🎮 ゲーム</option>
+        <option value="仕事">💼 仕事・生産性</option>
+        <option value="エンタメ">🎬 エンタメ</option>
+        <option value="その他">📦 その他</option>
+      </select>
+    </div>
+
+    <div class="fg">
+      <label class="flabel">説明文</label>
+      <textarea class="ftextarea" id="appDesc"
+                placeholder="このアプリの説明を入力…" rows="3"></textarea>
+    </div>
+
+    <button class="submit-full" id="submitFull" onclick="submitApp()" disabled>
+      登録する
+    </button>
+  </div>
+</div>
+
+<!-- ===================== PIN MODAL ===================== -->
+<div class="pin-overlay" id="pinOverlay">
+  <div class="pin-card">
+    <div class="pin-icon" id="pinIcon">🔒</div>
+    <div class="pin-title" id="pinTitle">管理者ログイン</div>
+    <div class="pin-sub" id="pinSub">PINコードを入力してください</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="pd0"></div>
+      <div class="pin-dot" id="pd1"></div>
+      <div class="pin-dot" id="pd2"></div>
+      <div class="pin-dot" id="pd3"></div>
+    </div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinInput('1')">1</button>
+      <button class="pin-key" onclick="pinInput('2')">2</button>
+      <button class="pin-key" onclick="pinInput('3')">3</button>
+      <button class="pin-key" onclick="pinInput('4')">4</button>
+      <button class="pin-key" onclick="pinInput('5')">5</button>
+      <button class="pin-key" onclick="pinInput('6')">6</button>
+      <button class="pin-key" onclick="pinInput('7')">7</button>
+      <button class="pin-key" onclick="pinInput('8')">8</button>
+      <button class="pin-key" onclick="pinInput('9')">9</button>
+      <button class="pin-key" style="opacity:0;pointer-events:none"></button>
+      <button class="pin-key" onclick="pinInput('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-error" id="pinError"></div>
+    <button class="pin-close" onclick="closePinModal()">キャンセル</button>
+  </div>
+</div>
+
+<!-- ===================== INSTALL GUIDE SHEET ===================== -->
+<div class="install-overlay" id="installOverlay" onclick="bgClose(event,'installOverlay')">
+  <div class="install-sheet">
+    <div class="sheet-handle"></div>
+    <div class="install-hd">
+      <div class="install-app-icon" id="installIcon">📱</div>
+      <div>
+        <div class="install-app-name" id="installAppName"></div>
+        <div class="install-app-sub" id="installAppSub">ホーム画面に追加</div>
+      </div>
+    </div>
+    <div class="install-body">
+      <div class="install-platform-title" id="installPlatformTitle"></div>
+      <div class="install-steps" id="installSteps"></div>
+      <button class="install-open-btn" id="installOpenBtn" onclick="doInstallOpen()">
+        アプリを開いてインストール
+      </button>
+      <div class="install-note" id="installNote"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST / IMPORT -->
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+
+<script>
+/* ============================================================
+   STATE
+============================================================ */
+let apps = [];
+let isAdmin = false;
+let editingId = null;
+let currentId = null;
+let installTarget = null;
+let deferredPrompt = null; // Android PWA prompt
+
+const SK  = 'mas_apps';
+const CFG = 'mas_cfg';
+let cfg = { theme: 'light', token: '', gistId: '', lastSync: '', pin: '1234' };
+
+// PIN mode: 'login' | 'setup' | 'setup2'
+let pinMode = 'login';
+let pinBuffer = '';
+let pinSetupFirst = '';
+
+/* ============================================================
+   INIT
+============================================================ */
+function init() {
+  loadCfg();
+  loadApps();
+  applyTheme();
+  renderAll();
+  buildChips();
+  updateAdminUI();
+  // Restore session
+  if (sessionStorage.getItem('mas_admin') === '1') {
+    isAdmin = true;
+    updateAdminUI();
+  }
+}
+
+/* ============================================================
+   STORAGE
+============================================================ */
+function loadApps() {
+  try { apps = JSON.parse(localStorage.getItem(SK)) || []; } catch { apps = []; }
+}
+function saveApps() { localStorage.setItem(SK, JSON.stringify(apps)); }
+function loadCfg() {
+  try { const c = JSON.parse(localStorage.getItem(CFG)); if (c) cfg = { ...cfg, ...c }; } catch {}
+  document.getElementById('tokenInput').value = cfg.token || '';
+  document.getElementById('gistIdInput').value = cfg.gistId || '';
+  if (cfg.lastSync) document.getElementById('lastSyncText').textContent = cfg.lastSync;
+  updateTokenStatus();
+}
+function saveCfg() {
+  cfg.token = document.getElementById('tokenInput').value.trim();
+  cfg.gistId = document.getElementById('gistIdInput').value.trim();
+  localStorage.setItem(CFG, JSON.stringify(cfg));
+  updateTokenStatus();
+}
+
+/* ============================================================
+   THEME
+============================================================ */
+function toggleTheme() {
+  cfg.theme = cfg.theme === 'dark' ? 'light' : 'dark';
+  saveCfg(); applyTheme();
+}
+function applyTheme() {
+  const dark = cfg.theme === 'dark';
+  document.documentElement.setAttribute('data-theme', cfg.theme);
+  document.getElementById('themeToggle').classList.toggle('on', dark);
+  document.getElementById('themeBtn').textContent = dark ? '☀️' : '🌙';
+  document.getElementById('themeSubText').textContent = `現在：${dark ? 'ダーク' : 'ライト'}`;
+}
+
+/* ============================================================
+   ADMIN
+============================================================ */
+function handleAdminBtn() {
+  if (isAdmin) { logoutAdmin(); }
+  else { pinMode = 'login'; openPinModal(); }
+}
+function logoutAdmin() {
+  isAdmin = false;
+  sessionStorage.removeItem('mas_admin');
+  updateAdminUI();
+  showToast('🔒 ログアウトしました');
+}
+function updateAdminUI() {
+  const btn = document.getElementById('adminBtn');
+  const fab = document.getElementById('fab');
+  const abtns = document.getElementById('detailAdminBtns');
+  btn.textContent = isAdmin ? '🔓' : '🔒';
+  btn.classList.toggle('admin-active', isAdmin);
+  fab.classList.toggle('hidden', !isAdmin);
+  if (abtns) abtns.style.display = isAdmin ? 'flex' : 'none';
+}
+function openPinSetup() {
+  pinMode = 'setup';
+  openPinModal('🛠️', 'PIN変更', '新しいPINを入力してください');
+}
+
+/* ============================================================
+   PIN MODAL
+============================================================ */
+function openPinModal(icon = '🔒', title = '管理者ログイン', sub = 'PINコードを入力してください') {
+  pinBuffer = '';
+  pinSetupFirst = '';
+  document.getElementById('pinIcon').textContent = icon;
+  document.getElementById('pinTitle').textContent = title;
+  document.getElementById('pinSub').textContent = sub;
+  document.getElementById('pinError').textContent = '';
+  updatePinDots();
+  document.getElementById('pinOverlay').classList.add('open');
+}
+function closePinModal() {
+  document.getElementById('pinOverlay').classList.remove('open');
+  pinBuffer = '';
+}
+function pinInput(d) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += d;
+  updatePinDots();
+  if (pinBuffer.length === 4) setTimeout(checkPin, 120);
+}
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+}
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const el = document.getElementById('pd' + i);
+    el.className = 'pin-dot' + (i < pinBuffer.length ? ' filled' : '');
+  }
+}
+function checkPin() {
+  if (pinMode === 'login') {
+    if (pinBuffer === cfg.pin) {
+      isAdmin = true;
+      sessionStorage.setItem('mas_admin', '1');
+      closePinModal();
+      updateAdminUI();
+      showToast('🔓 管理者モードで開きました');
+    } else {
+      pinError();
+    }
+  } else if (pinMode === 'setup') {
+    pinSetupFirst = pinBuffer;
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pinSub').textContent = 'もう一度入力してください';
+    document.getElementById('pinError').textContent = '';
+    pinMode = 'setup2';
+  } else if (pinMode === 'setup2') {
+    if (pinBuffer === pinSetupFirst) {
+      cfg.pin = pinBuffer;
+      saveCfg();
+      closePinModal();
+      showToast('✅ PINを変更しました');
+    } else {
+      pinError('PINが一致しません');
+    }
+  }
+}
+function pinError(msg = 'PINが違います') {
+  for (let i = 0; i < 4; i++) document.getElementById('pd' + i).className = 'pin-dot error';
+  document.getElementById('pinError').textContent = msg;
+  setTimeout(() => {
+    pinBuffer = '';
+    updatePinDots();
+    document.getElementById('pinError').textContent = '';
+  }, 900);
+}
+
+/* ============================================================
+   TAB
+============================================================ */
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  if (tab === 'search') { doSearch(); }
+}
+
+/* ============================================================
+   RENDER
+============================================================ */
+function iconHTML(app, w, r) {
+  return app.icon
+    ? `<img src="${app.icon}" alt="" style="width:${w}px;height:${w}px;object-fit:cover;border-radius:${r}px">`
+    : '<span style="font-size:' + Math.round(w * .44) + 'px">📱</span>';
+}
+
+function renderAll() {
+  renderFeatured(); renderRecent(); renderAllList();
+}
+
+function renderFeatured() {
+  const a = [...apps].sort((a, b) => b.addedAt - a.addedAt)[0];
+  if (!a) return;
+  document.getElementById('featuredTitle').textContent = a.name;
+  document.getElementById('featuredSub').textContent = a.desc || 'タップして詳細を見る';
+  const fi = document.getElementById('featuredIcon');
+  fi.innerHTML = a.icon ? `<img src="${a.icon}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:18px">` : '📱';
+}
+function featuredTap() {
+  const a = [...apps].sort((x, y) => y.addedAt - x.addedAt)[0];
+  if (a) openDetail(a.id);
+}
+
+function renderRecent() {
+  const row = document.getElementById('recentRow');
+  const list = [...apps].sort((a, b) => b.addedAt - a.addedAt).slice(0, 10);
+  if (!list.length) {
+    row.innerHTML = `<div class="empty" style="padding:20px 0"><div class="empty-icon">📭</div><p>まだアプリがありません</p></div>`;
+    return;
+  }
+  row.innerHTML = list.map(a => `
+    <div class="app-card" onclick="openDetail('${a.id}')">
+      <div class="app-card-icon">${iconHTML(a, 78, 20)}</div>
+      <div class="app-card-name">${esc(a.name)}</div>
+      <div class="app-card-cat">${esc(a.cat)}</div>
+      <button class="get-btn" onclick="event.stopPropagation();getApp('${a.id}')">入手</button>
+    </div>
+  `).join('');
+}
+
+function renderAllList(src = null) {
+  const el = document.getElementById('allList');
+  const list = src !== null ? src : [...apps].sort((a, b) => b.addedAt - a.addedAt);
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">📦</div><h3>アプリがありません</h3><p>管理者モードで＋ボタンから追加してください</p></div>`;
+    return;
+  }
+  el.innerHTML = list.map(a => `
+    <div class="ali" onclick="openDetail('${a.id}')">
+      <div class="ali-icon">${iconHTML(a, 60, 14)}</div>
+      <div class="ali-info">
+        <div class="ali-name">${esc(a.name)}</div>
+        <div class="ali-cat">${esc(a.cat)}</div>
+        <div class="ali-desc">${esc(a.desc || '説明なし')}</div>
+      </div>
+      <div class="ali-action">
+        <button class="get-btn" onclick="event.stopPropagation();getApp('${a.id}')">入手</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   SEARCH
+============================================================ */
+let activeChip = 'すべて';
+const CATS = ['すべて', 'ツール', 'ライフスタイル', '健康', 'ゲーム', '仕事', 'エンタメ', 'その他'];
+function buildChips() {
+  document.getElementById('catChips').innerHTML = CATS.map(c =>
+    `<button class="chip ${c === activeChip ? 'active' : ''}" onclick="selChip('${c}')">${c}</button>`
+  ).join('');
+}
+function selChip(c) { activeChip = c; buildChips(); doSearch(); }
+function doSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let r = [...apps];
+  if (activeChip !== 'すべて') r = r.filter(a => a.cat === activeChip);
+  if (q) r = r.filter(a => a.name.toLowerCase().includes(q) || (a.desc || '').toLowerCase().includes(q));
+  const el = document.getElementById('searchList');
+  if (!r.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🔍</div><h3>見つかりません</h3></div>`;
+    return;
+  }
+  el.innerHTML = r.map(a => `
+    <div class="ali" onclick="openDetail('${a.id}')">
+      <div class="ali-icon">${iconHTML(a, 60, 14)}</div>
+      <div class="ali-info">
+        <div class="ali-name">${esc(a.name)}</div>
+        <div class="ali-cat">${esc(a.cat)}</div>
+        <div class="ali-desc">${esc(a.desc || '説明なし')}</div>
+      </div>
+      <div class="ali-action">
+        <button class="get-btn" onclick="event.stopPropagation();getApp('${a.id}')">入手</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ============================================================
+   DETAIL
+============================================================ */
+function openDetail(id) {
+  const a = apps.find(x => x.id === id);
+  if (!a) return;
+  currentId = id;
+  const di = document.getElementById('detailIcon');
+  di.innerHTML = a.icon ? `<img src="${a.icon}" alt="" style="width:90px;height:90px;object-fit:cover;border-radius:22px">` : '📱';
+  document.getElementById('detailName').textContent = a.name;
+  document.getElementById('detailCat').textContent = a.cat;
+  document.getElementById('detailDesc').textContent = a.desc || '説明なし';
+  document.getElementById('detailUrl').textContent = a.url;
+  document.getElementById('detailAdminBtns').style.display = isAdmin ? 'flex' : 'none';
+  document.getElementById('detailOverlay').classList.add('open');
+}
+function openCurrentApp() {
+  const a = apps.find(x => x.id === currentId);
+  if (a) window.open(a.url, '_blank');
+}
+function copyUrl() {
+  const a = apps.find(x => x.id === currentId);
+  if (!a) return;
+  navigator.clipboard?.writeText(a.url).then(() => showToast('📋 URLをコピーしました'));
+}
+function editCurrentApp() {
+  closeOverlay('detailOverlay');
+  openEditModal(currentId);
+}
+function deleteCurrentApp() {
+  const a = apps.find(x => x.id === currentId);
+  if (!a || !confirm(`「${a.name}」を削除しますか？`)) return;
+  apps = apps.filter(x => x.id !== currentId);
+  saveApps(); closeOverlay('detailOverlay'); renderAll(); doSearch();
+  showToast('🗑️ 削除しました');
+}
+
+/* ============================================================
+   GET / INSTALL
+============================================================ */
+function getApp(id) {
+  const a = apps.find(x => x.id === id);
+  if (!a) return;
+  currentId = id;
+  triggerInstall(a);
+}
+function triggerInstall(app = null) {
+  const a = app || apps.find(x => x.id === currentId);
+  if (!a) return;
+  installTarget = a;
+  showInstallGuide(a);
+}
+
+function showInstallGuide(a) {
+  // Icon
+  const ii = document.getElementById('installIcon');
+  ii.innerHTML = a.icon ? `<img src="${a.icon}" alt="" style="width:56px;height:56px;object-fit:cover;border-radius:14px">` : '📱';
+  document.getElementById('installAppName').textContent = a.name;
+
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
+  const isSafari = /Safari/i.test(ua) && !/Chrome/i.test(ua);
+
+  let title = '', steps = [], note = '';
+
+  if (isIOS) {
+    title = '📱 iPhoneへのインストール手順';
+    steps = [
+      { n: 1, t: '「アプリを開いてインストール」ボタンをタップしてアプリを開く' },
+      { n: 2, t: 'Safari下部の<strong>共有ボタン（□↑）</strong>をタップ' },
+      { n: 3, t: '「<strong>ホーム画面に追加</strong>」をタップ' },
+      { n: 4, t: '名前を確認して右上の「<strong>追加</strong>」をタップ' },
+    ];
+    note = 'Safariブラウザで開いてください。Chrome等では追加できません。';
+  } else if (isAndroid) {
+    title = '🤖 Androidへのインストール手順';
+    if (deferredPrompt) {
+      steps = [
+        { n: 1, t: '「アプリを開いてインストール」ボタンをタップ' },
+        { n: 2, t: 'ブラウザの<strong>インストールダイアログ</strong>が表示されます' },
+        { n: 3, t: '「<strong>インストール</strong>」をタップして完了' },
+      ];
+    } else {
+      steps = [
+        { n: 1, t: '「アプリを開いてインストール」ボタンをタップしてアプリを開く' },
+        { n: 2, t: 'Chromeメニュー（⋮）→「<strong>ホーム画面に追加</strong>」をタップ' },
+        { n: 3, t: '「<strong>追加</strong>」をタップして完了' },
+      ];
+    }
+    note = 'Chrome推奨です。Samsung Internetも対応しています。';
+  } else {
+    title = '💻 PCへのインストール手順';
+    steps = [
+      { n: 1, t: '「アプリを開いてインストール」ボタンをクリック' },
+      { n: 2, t: 'アドレスバー右端の<strong>インストールアイコン（⊕）</strong>をクリック' },
+      { n: 3, t: '「<strong>インストール</strong>」をクリックして完了' },
+    ];
+    note = 'Chrome / Edge 対応。インストールアイコンが出ない場合はメニュー→「○○をインストール」を選択。';
+  }
+
+  document.getElementById('installPlatformTitle').textContent = title;
+  document.getElementById('installSteps').innerHTML = steps.map(s =>
+    `<div class="install-step">
+      <div class="step-num">${s.n}</div>
+      <div class="step-text">${s.t}</div>
+    </div>`
+  ).join('');
+  document.getElementById('installNote').textContent = note;
+  document.getElementById('installOverlay').classList.add('open');
+}
+
+function doInstallOpen() {
+  if (!installTarget) return;
+  // Android: try native prompt first
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    closeOverlay('installOverlay');
+    return;
+  }
+  window.open(installTarget.url, '_blank');
+  closeOverlay('installOverlay');
+}
+
+// Capture Android install prompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+});
+
+/* ============================================================
+   ADD / EDIT MODAL
+============================================================ */
+function openAddModal() {
+  if (!isAdmin) return;
+  editingId = null;
+  document.getElementById('addTitle').textContent = 'アプリを追加';
+  resetForm();
+  document.getElementById('addOverlay').classList.add('open');
+}
+function openEditModal(id) {
+  const a = apps.find(x => x.id === id);
+  if (!a) return;
+  editingId = id;
+  document.getElementById('addTitle').textContent = 'アプリを編集';
+  document.getElementById('urlInput').value = a.url;
+  document.getElementById('appName').value = a.name;
+  document.getElementById('appCat').value = a.cat;
+  document.getElementById('appDesc').value = a.desc || '';
+  if (a.icon) {
+    showPreview(a.icon, a.name, a.url);
+  }
+  document.getElementById('addOverlay').classList.add('open');
+  validateForm();
+}
+function resetForm() {
+  document.getElementById('urlInput').value = '';
+  document.getElementById('appName').value = '';
+  document.getElementById('appDesc').value = '';
+  document.getElementById('appCat').value = 'ツール';
+  document.getElementById('urlPreview').classList.remove('show');
+  document.getElementById('fetchBtn').disabled = true;
+  setSubmit(false);
+}
+function onUrlInput() {
+  const v = document.getElementById('urlInput').value.trim();
+  document.getElementById('fetchBtn').disabled = !v.startsWith('http');
+  validateForm();
+}
+function showPreview(icon, name, url) {
+  const pi = document.getElementById('prevIcon');
+  pi.innerHTML = icon ? `<img src="${icon}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:13px">` : '📱';
+  document.getElementById('prevName').textContent = name || '不明';
+  document.getElementById('prevUrl').textContent = url;
+  document.getElementById('urlPreview').classList.add('show');
+}
+
+/* fetch manifest.json from target URL */
+async function fetchMeta() {
+  const rawUrl = document.getElementById('urlInput').value.trim();
+  if (!rawUrl) return;
+  const btn = document.getElementById('fetchBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const base = rawUrl.endsWith('/') ? rawUrl : rawUrl + '/';
+    // Try to get manifest.json
+    let icon = '', name = '';
+
+    // Attempt 1: direct fetch manifest (works if CORS allowed)
+    try {
+      const mRes = await fetch(base + 'manifest.json', { mode: 'cors', cache: 'no-cache' });
+      if (mRes.ok) {
+        const m = await mRes.json();
+        name = m.name || m.short_name || '';
+        // icon
+        const icons = m.icons || [];
+        const best = icons.sort((a, b) => {
+          const sa = parseInt((a.sizes || '0').split('x')[0]) || 0;
+          const sb = parseInt((b.sizes || '0').split('x')[0]) || 0;
+          return sb - sa;
+        })[0];
+        if (best) {
+          const iUrl = best.src.startsWith('http') ? best.src : base + best.src.replace(/^\//, '');
+          // Fetch icon as base64
+          try {
+            const iRes = await fetch(iUrl, { mode: 'cors' });
+            if (iRes.ok) {
+              const blob = await iRes.blob();
+              icon = await blobToBase64(blob);
+            }
+          } catch { icon = iUrl; }
+        }
+      }
+    } catch {}
+
+    // Attempt 2: allorigins proxy for HTML meta
+    if (!name) {
+      try {
+        const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(rawUrl)}`;
+        const pRes = await fetch(proxy);
+        const pJson = await pRes.json();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(pJson.contents, 'text/html');
+        name = doc.querySelector('title')?.textContent?.trim() || '';
+        if (!icon) {
+          const link = doc.querySelector('link[rel*="apple-touch-icon"]') ||
+                       doc.querySelector('link[rel*="icon"]');
+          if (link) {
+            const h = link.getAttribute('href') || '';
+            if (h.startsWith('data:')) icon = h;
+            else if (h) {
+              const full = h.startsWith('http') ? h : base + h.replace(/^\//, '');
+              try {
+                const ir = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(full)}`);
+                if (ir.ok) icon = await blobToBase64(await ir.blob());
+              } catch {}
+            }
+          }
+        }
+      } catch {}
+    }
+
+    if (name) document.getElementById('appName').value = name;
+    showPreview(icon, name || 'タイトル取得中…', rawUrl);
+    validateForm();
+    showToast('✅ 情報を取得しました');
+  } catch (e) {
+    showToast('⚠️ 取得失敗。名前を手動入力してください');
+  } finally {
+    btn.textContent = '取得';
+    btn.disabled = false;
+  }
+}
+
+function blobToBase64(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+function validateForm() {
+  const ok = document.getElementById('appName').value.trim().length > 0 &&
+             document.getElementById('urlInput').value.trim().startsWith('http');
+  setSubmit(ok);
+}
+function setSubmit(ok) {
+  document.getElementById('addActionBtn').disabled = !ok;
+  const sb = document.getElementById('submitFull');
+  sb.disabled = !ok; sb.style.opacity = ok ? '1' : '.4';
+}
+
+function submitApp() {
+  const url  = document.getElementById('urlInput').value.trim();
+  const name = document.getElementById('appName').value.trim();
+  const cat  = document.getElementById('appCat').value;
+  const desc = document.getElementById('appDesc').value.trim();
+  if (!url || !name) return;
+
+  // Get icon from preview if available
+  const pi = document.getElementById('prevIcon').querySelector('img');
+  const icon = pi ? pi.src : '';
+
+  if (editingId) {
+    const idx = apps.findIndex(a => a.id === editingId);
+    if (idx >= 0) apps[idx] = { ...apps[idx], url, name, cat, desc, icon, updatedAt: Date.now() };
+    showToast('✅ 更新しました');
+  } else {
+    apps.unshift({
+      id: 'app_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+      url, name, cat, desc, icon,
+      addedAt: Date.now(), updatedAt: Date.now()
+    });
+    showToast('🎉 追加しました！');
+  }
+  saveApps();
+  closeOverlay('addOverlay');
+  renderAll(); doSearch();
+}
+
+/* ============================================================
+   GIST SYNC
+============================================================ */
+async function syncGist() {
+  const token = cfg.token || document.getElementById('tokenInput').value.trim();
+  if (!token) { showToast('⚠️ トークンを設定してください'); switchTab('settings'); return; }
+  const btn = document.getElementById('syncBtn');
+  btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const gistId = cfg.gistId || document.getElementById('gistIdInput').value.trim();
+    const body = {
+      description: 'MyAppStore Data',
+      public: false,
+      files: { 'myappstore.json': { content: JSON.stringify(apps, null, 2) || '[]' } }
+    };
+    const method = gistId ? 'PATCH' : 'POST';
+    const endpoint = gistId
+      ? `https://api.github.com/gists/${gistId}`
+      : 'https://api.github.com/gists';
+    const res = await fetch(endpoint, {
+      method,
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || res.status);
+    if (!gistId) {
+      cfg.gistId = json.id;
+      document.getElementById('gistIdInput').value = json.id;
+    }
+    cfg.lastSync = new Date().toLocaleString('ja-JP');
+    document.getElementById('lastSyncText').textContent = cfg.lastSync;
+    saveCfg();
+    showToast('☁️ 同期完了！');
+  } catch (e) {
+    showToast('❌ 同期失敗: ' + e.message);
+  } finally { btn.textContent = '☁️'; }
+}
+
+async function loadFromGist() {
+  if (!cfg.token || !cfg.gistId) return;
+  try {
+    const res = await fetch(`https://api.github.com/gists/${cfg.gistId}`, {
+      headers: { Authorization: `token ${cfg.token}` }
+    });
+    const json = await res.json();
+    const content = json.files?.['myappstore.json']?.content;
+    if (!content) return;
+    const remote = JSON.parse(content);
+    const map = new Map(apps.map(a => [a.id, a]));
+    for (const ra of remote) {
+      const local = map.get(ra.id);
+      if (!local || ra.updatedAt > local.updatedAt) map.set(ra.id, ra);
+    }
+    apps = [...map.values()].sort((a, b) => b.addedAt - a.addedAt);
+    saveApps(); renderAll(); doSearch();
+  } catch {}
+}
+
+/* ============================================================
+   TOKEN STATUS
+============================================================ */
+function onTokenInput() { saveCfg(); }
+function updateTokenStatus() {
+  const el = document.getElementById('tokenStatus');
+  const t = cfg.token;
+  if (!t) { el.textContent = '未設定'; el.className = 'status-pill idle'; return; }
+  if (t.length > 20) { el.textContent = '設定済み'; el.className = 'status-pill ok'; }
+  else { el.textContent = '形式?'; el.className = 'status-pill ng'; }
+}
+
+/* ============================================================
+   EXPORT / IMPORT / CLEAR
+============================================================ */
+function exportData() {
+  const b = new Blob([JSON.stringify(apps, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(b);
+  a.download = `myappstore_${Date.now()}.json`;
+  a.click();
+  showToast('📤 エクスポート完了');
+}
+function importData(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      const map = new Map(apps.map(a => [a.id, a]));
+      for (const ra of data) { const l = map.get(ra.id); if (!l || ra.updatedAt > l.updatedAt) map.set(ra.id, ra); }
+      apps = [...map.values()].sort((a, b) => b.addedAt - a.addedAt);
+      saveApps(); renderAll(); doSearch();
+      showToast(`✅ ${data.length}件インポート`);
+    } catch { showToast('❌ 読み込み失敗'); }
+    e.target.value = '';
+  };
+  r.readAsText(file);
+}
+function confirmClear() {
+  if (!confirm('全データを削除しますか？')) return;
+  apps = []; saveApps(); renderAll(); doSearch();
+  showToast('🗑️ 削除しました');
+}
+
+/* ============================================================
+   UTIL
+============================================================ */
+function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
+function bgClose(e, id) { if (e.target === document.getElementById(id)) closeOverlay(id); }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ============================================================
+   BOOT
+============================================================ */
+init();
+if (cfg.token && cfg.gistId) loadFromGist();
+</script>
+</body>
+</html>
